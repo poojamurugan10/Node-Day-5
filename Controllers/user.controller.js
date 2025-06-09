@@ -9,10 +9,10 @@ dotenv.config();
 
 export const registerUser = async (req, res) => {
   try {
-    const { username, email, password } = req.body;
+    const { username, email, password, role } = req.body;
     const hashPassword = await bcrypt.hash(password, 10);
     console.log(hashPassword);
-    const newUser = new User({ username, email, password: hashPassword });
+    const newUser = new User({ username, email, password: hashPassword, role });
     await newUser.save();
     res
       .status(200)
@@ -24,25 +24,37 @@ export const registerUser = async (req, res) => {
 
 //login user
 
-export const loginUser = async (req,res) => {
+export const loginUser = async (req, res) => {
   try {
-    const { username, email,} = req.body;
-    const user = await User.findOne({email})
-    if(!user){
-      return res.status(404).json({message: "user not found"})
+    const { email, password } = req.body;
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(404).json({ message: "User Not Found" });
     }
-    const passwordMatch = await bcrypt.compare(password,user.password)
-    if(!passwordMatch){
-      return res.status(404).json({message: "invalid password"})
+    const passwordMatch = await bcrypt.compare(password, user.password);
+    if (!passwordMatch) {
+      return res.status(404).json({ message: "Invalid Password" });
     }
-    const token = jwt.sign({_id:user._id},process.env.JWT_SECRET, {expiresIn:"1hr"});
+    const token = jwt.sign({ _id: user._id }, process.env.JWT_SECRET, {
+      expiresIn: "1h",
+    });
     user.token = token;
     await user.save();
     res
       .status(200)
-      .json({ message: "User Loggedin Successfully", token:token });
-
-    } catch (error) {
+      .json({ message: "User LoggedIn Successfully", token: token });
+  } catch (error) {
     res.status(500).json({ message: error.message });
   }
-}
+};
+
+//get User
+
+export const getUser = async (req, res) => {
+  try {
+    const user = await User.find();
+    res.status(200).json({ message: "Authorized User", data: user });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
