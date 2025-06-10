@@ -26,3 +26,7 @@ API Endpoints
 -POST /login – Authenticate user and get token
 
 -GET /protected – Access protected route (JWT required)
+
+## POSTMAN DOCUMENTATION
+
+**https://documenter.getpostman.com/view/45005245/2sB2x5FsEi**
